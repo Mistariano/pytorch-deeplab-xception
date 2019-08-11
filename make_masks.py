@@ -1,6 +1,6 @@
-# 
-# demo.py 
-# 
+#
+# demo.py
+#
 import argparse
 import os
 import numpy as np
@@ -11,6 +11,7 @@ from PIL import Image
 from torchvision import transforms
 from dataloaders.utils import *
 from torchvision.utils import make_grid, save_image
+from tqdm import tqdm
 
 
 def main():
@@ -68,7 +69,9 @@ def main():
         tr.ToTensor()])
     if not os.path.exists(args.out_dir):
         os.makedirs(args.out_dir)
-    for fname in os.listdir(args.in_dir):
+    listdir = os.listdir(args.in_dir)
+    pbar = tqdm(listdir, total=len(listdir))
+    for fname in pbar:
         fpath = os.path.join(args.in_dir, fname)
         outpath = os.path.join(args.out_dir, fname)
         image = Image.open(fpath).convert('RGB')
@@ -89,8 +92,8 @@ def main():
             3, normalize=False, range=(0, 255))
         grid_image = grid_image[0:1, ...] + grid_image[1:2, ...] + grid_image[2:3, ...]
         grid_image[grid_image > 0] = 255
-        print("type(grid) is: ", type(grid_image))
-        print("grid_image.shape is: ", grid_image.shape)
+        #print("type(grid) is: ", type(grid_image))
+        #print("grid_image.shape is: ", grid_image.shape)
         save_image(grid_image, outpath)
 
 
