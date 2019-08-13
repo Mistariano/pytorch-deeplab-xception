@@ -17,6 +17,7 @@ from tqdm import tqdm
 def main():
     parser = argparse.ArgumentParser(description="PyTorch DeeplabV3Plus Training")
     parser.add_argument('--in-dir', type=str, required=True, help='image to test')
+    parser.add_argument('--in-flist',type=str,required=True,help='image flist')
     parser.add_argument('--out-dir', type=str, required=True, help='mask image to save')
     parser.add_argument('--backbone', type=str, default='mobilenet',
                         choices=['resnet', 'xception', 'drn', 'mobilenet'],
@@ -70,10 +71,19 @@ def main():
     if not os.path.exists(args.out_dir):
         os.makedirs(args.out_dir)
     listdir = os.listdir(args.in_dir)
-    pbar = tqdm(listdir, total=len(listdir))
+    with open(args.in_flist, 'r') as f:
+        in_flist = f.readlines()
+    in_flist = [f.split(' ')[0] for f in in_flist]
+    # out_listdir = os.listdir(args.out_dir)
+    pbar = tqdm(in_flist, total=len(in_flist))
     for fname in pbar:
-        fpath = os.path.join(args.in_dir, fname)
         outpath = os.path.join(args.out_dir, fname)
+        #if fname in out_listdir:
+        if os.path.exists(outpath):
+            pbar.set_description(fname+' exists')
+            continue
+        fpath = os.path.join(args.in_dir, fname)
+        pbar.set_description('')
         image = Image.open(fpath).convert('RGB')
         # target = Image.open(args.in_path).convert('L')
         target = image.convert('L')
@@ -94,6 +104,10 @@ def main():
         grid_image[grid_image > 0] = 255
         #print("type(grid) is: ", type(grid_image))
         #print("grid_image.shape is: ", grid_image.shape)
+        _outdir = os.path.split(outpath)[:-1]
+        _outdir = '/'.join(_outdir)
+        if not os.path.exists(_outdir):
+            os.makedirs(_outdir)
         save_image(grid_image, outpath)
 
 
